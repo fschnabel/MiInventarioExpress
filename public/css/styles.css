@@ -1,0 +1,6 @@
+body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; }
+nav a, nav button { margin-right: 1rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+td, th { border: 1px solid #ddd; padding: .5rem; }
+.ok { color: #2b8a3e; }
+.err { color: #c92a2a; }

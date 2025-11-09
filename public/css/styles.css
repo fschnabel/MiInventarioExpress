@@ -1,6 +1,338 @@
-body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; }
-nav a, nav button { margin-right: 1rem; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-td, th { border: 1px solid #ddd; padding: .5rem; }
-.ok { color: #2b8a3e; }
-.err { color: #c92a2a; }
+/* ===========================
+   RESET / BASE
+   =========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: #f4f6f9;
+  color: #333;
+  line-height: 1.5;
+  padding: 0;
+  margin: 0;
+}
+
+
+h1, h2, h3 {
+  font-weight: 600;
+  margin-bottom: .8rem;
+  color: #2a2a2a;
+}
+
+/* ===========================
+   LAYOUT / CONTAINER
+   =========================== */
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+
+/* ===========================
+   NAVBAR
+   =========================== */
+nav {
+  background: #005bbb;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ===========================
+   BUTTONS
+   =========================== */
+button, .btn {
+  display: inline-block;
+  padding: .6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  background: #005bbb;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background .2s ease;
+}
+
+button:hover, .btn:hover {
+  background: #014b9b;
+}
+
+/* secondary buttons */
+.btn-sec {
+  background: #666;
+}
+
+.btn-sec:hover {
+  background: #444;
+}
+
+/* ===========================
+   FORMS
+   =========================== */
+form {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="file"],
+textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: .6rem;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+label {
+  font-weight: 500;
+}
+
+/* ===========================
+   TABLES
+   =========================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+thead {
+  background: #005bbb;
+  color: white;
+}
+
+thead th {
+  padding: 12px;
+  text-align: left;
+}
+
+tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+  background: #eef6ff;
+}
+
+td {
+  padding: 10px;
+}
+
+td img {
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* ===========================
+   ALERTAS (error / success)
+   =========================== */
+.alert {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: .8rem;
+}
+
+.alert-error {
+  background: #ffdddd;
+  color: #a70000;
+  border: 1px solid #e09696;
+}
+
+.alert-success {
+  background: #ddffdd;
+  color: #006b00;
+  border: 1px solid #7ce27c;
+}
+
+/* ===========================
+   CHAT
+   =========================== */
+#chat {
+  max-width: 900px;
+  margin: auto;
+}
+
+#msgs {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  height: 380px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+#msgs div {
+  background: #eef6ff;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 4px solid #005bbb;
+}
+
+#fChat input {
+  padding: .8rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 980px;
+    margin: 1.5rem auto;
+}
+
+/* Acciones (botones y enlaces) */
+.actions a,
+.actions button {
+    margin-right: 0.5rem;
+}
+
+/* Estados */
+.err {
+    color: #b00020;
+}
+
+.ok {
+    color: #2b8a3e;
+}
+
+/* Campos de formulario */
+.field {
+    margin-bottom: 0.8rem;
+}
+
+.field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.8rem;
+}
+
+th,
+td {
+    border: 1px solid #eee;
+    padding: 0.5rem;
+}
+
+/* === CONTENEDOR DEL CHAT === */
+#chat {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    max-width: 820px;
+    margin: 1rem auto;
+    background: #ffffff;
+}
+
+/* === MENSAJES === */
+#msgs {
+    height: 360px;
+    overflow-y: auto;
+    padding: 6px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+/* === FORMULARIO DE INPUT === */
+#fChat {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+#fChat input {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+#fChat button {
+    padding: 0.6rem 1rem;
+    background: #0077ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+#fChat button:hover {
+    background: #005fcc;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 480px) {
+    #chat {
+        padding: 8px;
+    }
+
+    #msgs {
+        height: 300px; /* más ajustado para pantallas pequeñas */
+    }
+
+    #fChat {
+        flex-direction: column;
+    }
+
+    #fChat button {
+        width: 100%;
+    }
+}
+

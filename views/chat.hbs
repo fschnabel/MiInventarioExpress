@@ -1,14 +1,14 @@
 <h1>Chat</h1>
 
-<div id="chat" style="border:1px solid #eee; border-radius:8px; padding:10px; max-width:820px;">
-  <div id="msgs" style="height:360px; overflow:auto; padding:6px; background:#fafafa; border:1px solid #eee;"></div>
+<div id="chat">
+  <div id="msgs"></div>
 
-  <form id="fChat" style="margin-top:10px; display:flex; gap:8px;">
-    <input id="texto" name="texto" placeholder="Escribe un mensaje..." autocomplete="off"
-           style="flex:1; padding:.6rem; border:1px solid #ddd; border-radius:6px;" />
+  <form id="fChat">
+    <input id="texto" name="texto" placeholder="Escribe un mensaje..." autocomplete="off" />
     <button>Enviar</button>
   </form>
 </div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/chat.js"></script>

@@ -7,7 +7,15 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const conectarDB = require('./config/db');
 
+const http = require('http');
+const { Server } = require('socket.io');
+
+const { asegurarSesion } = require('./middleware/auth');
+
 const app = express();
+
+const httpServer = http.createServer(app);         
+const io = new Server(httpServer);                 
 
 // Middlewares base
 app.use(morgan('dev'));
@@ -30,13 +38,38 @@ app.use(session({
 
 // Rutas (MVC)
 app.use('/api/auth', require('./routes/auth.rutas'));
+app.use('/api/productos', require('./routes/producto.rutas'));
+
+app.get('/chat', asegurarSesion, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
 
 // Vista raíz
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+io.on('connection', (socket) => {
+  console.log('🟢 [WS] Cliente conectado:', socket.id);
+
+  socket.on('chat:msg', (payload) => {
+    // payload: { usuario, texto }
+    const t = new Date().toLocaleTimeString();
+    const limpio = {
+      usuario: (payload?.usuario || 'Anon'),
+      texto: (payload?.texto || '').toString().slice(0, 500), // limita tamaño
+      hora: t
+    };
+    console.log('💬 [WS] Mensaje:', limpio);
+    io.emit('chat:msg', limpio); // broadcast a todos
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 [WS] Cliente desconectado:', socket.id);
+  });
+});
 
 // Arranque
 (async () => {
   await conectarDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/miinventario');
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`🚀 http://localhost:${port}`));
+  httpServer.listen(port, () => console.log(`🚀 http://localhost:${port}`));
 })();

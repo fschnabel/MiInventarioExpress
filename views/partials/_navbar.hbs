@@ -1,0 +1,16 @@
+<nav style="padding:.6rem 0; border-bottom:1px solid #eee">
+  <a href="/">Inicio</a>
+  <a href="/v/productos">Productos</a>
+  <a href="/v/chat">Chat</a>
+  <span style="float:right">
+    {{#if usuario}}
+      <strong>{{usuario}}</strong>
+      <form action="/api/auth/logout" method="post" style="display:inline">
+        <button>Salir</button>
+      </form>
+    {{else}}
+      <a href="/v/login">Login</a>
+      <a href="/v/register">Registro</a>
+    {{/if}}
+  </span>
+</nav>

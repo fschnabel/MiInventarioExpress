@@ -15,7 +15,26 @@ const { asegurarSesion } = require('./middleware/auth');
 const app = express();
 
 const httpServer = http.createServer(app);         
-const io = new Server(httpServer);                 
+const io = new Server(httpServer);            
+
+const exphbs = require('express-handlebars');
+
+const ChatMensaje = require('./models/ChatMensaje');
+
+app.engine('hbs', exphbs.engine({
+  extname: '.hbs',
+  defaultLayout: 'main',
+  layoutsDir:  path.join(__dirname, 'views', 'layouts'),
+  partialsDir: path.join(__dirname, 'views', 'partials'),
+  helpers: {
+    moneda: v => Number(v || 0).toFixed(2),
+    or: (a,b) => a || b,
+    eq: (a,b) => a == b,
+    not: v => !v
+  }
+}));
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Middlewares base
 app.use(morgan('dev'));
@@ -28,44 +47,67 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Sesiones
-app.use(session({
+const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET || 'supersecreto',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: { maxAge: 1000*60*60*2 }
-}));
+});
+app.use(sessionMiddleware);
+
+// ...después de crear io:
+io.engine.use((req, res, next) => sessionMiddleware(req, res, next));
 
 // Rutas (MVC)
 app.use('/api/auth', require('./routes/auth.rutas'));
 app.use('/api/productos', require('./routes/producto.rutas'));
 
-app.get('/chat', asegurarSesion, (_req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+app.get('/v/chat', asegurarSesion, (_req, res) => {
+  res.render('chat', { title: 'Chat' });
 });
 
+
 // Vista raíz
-app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/', (req, res) => {
+  if (req.session?.userId) return res.redirect('/v/productos');
+  res.render('index', { title: 'Inicio' });
+});
+
+
+
+app.use((err, req, res, next) => {
+  console.error("[ERROR GLOBAL]", err);
+  res.status(500).json({ ok: false, error: "Error interno del servidor" });
+});
+
+app.use(require('./routes/vistas.rutas')); // después de sesiones y estáticos
+
+app.use('/api/chat', require('./routes/chat.rutas'));
+
+
+
 
 io.on('connection', (socket) => {
-  console.log('🟢 [WS] Cliente conectado:', socket.id);
+  const usuario = socket.request?.session?.usuario || 'anónimo';
+  console.log('🟢 [WS] Cliente conectado:', socket.id, 'usuario=', usuario);
 
-  socket.on('chat:msg', (payload) => {
-    // payload: { usuario, texto }
-    const t = new Date().toLocaleTimeString();
-    const limpio = {
-      usuario: (payload?.usuario || 'Anon'),
-      texto: (payload?.texto || '').toString().slice(0, 500), // limita tamaño
-      hora: t
-    };
-    console.log('💬 [WS] Mensaje:', limpio);
-    io.emit('chat:msg', limpio); // broadcast a todos
+  socket.on('chat:msg', async (payload) => {
+    const texto = (payload?.texto || '').toString().slice(0, 500).trim();
+    if (!texto) return;
+
+    const msg = { usuario, texto, ts: new Date() };
+
+    try { await ChatMensaje.create(msg); } catch (e) { console.error('CHAT save err:', e); }
+
+    io.emit('chat:msg', { ...msg, hora: msg.ts.toLocaleTimeString() });
   });
 
   socket.on('disconnect', () => {
     console.log('🔴 [WS] Cliente desconectado:', socket.id);
   });
 });
+
 
 // Arranque
 (async () => {

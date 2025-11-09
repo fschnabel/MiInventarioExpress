@@ -1,0 +1,35 @@
+<h1>Crear cuenta</h1>
+
+<form action="/v/register" method="post">
+  
+  {{!-- Errores generales --}}
+  {{> _alertas}}
+
+  <div class="field">
+    <label for="usuario">Usuario</label>
+    <input
+      id="usuario"
+      name="usuario"
+      value="{{old.usuario}}"
+      autocomplete="username"
+      required
+    >
+  </div>
+
+  <div class="field">
+    <label for="clave">Contraseña</label>
+    <input
+      id="clave"
+      name="clave"
+      type="password"
+      autocomplete="new-password"
+      required
+    >
+  </div>
+
+  <div class="actions">
+    <button>Crear cuenta</button>
+    <a href="/v/login">Iniciar sesión</a>
+  </div>
+
+</form>

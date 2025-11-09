@@ -1,0 +1,16 @@
+<h1>Ingreso</h1>
+
+<form action="/v/login" method="post">
+  <div class="field">
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" value="{{old.usuario}}" required>
+  </div>
+  <div class="field">
+    <label for="clave">Contraseña</label>
+    <input id="clave" name="clave" type="password" required>
+  </div>
+  <div class="actions">
+    <button>Entrar</button>
+    <a href="/v/register">Crear cuenta</a>
+  </div>
+</form>

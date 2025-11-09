@@ -1,38 +1,33 @@
-(async () => {
-  // 1) Obtener mi usuario desde la sesión
-  const meRes = await fetch('/api/auth/me');
-  const me = await meRes.json();
-  const usuario = me?.usuario || 'Anon';
-  document.getElementById('yo').textContent = usuario || 'Anon';
+(() => {
+  const msgs = document.getElementById('msgs');
+  const form = document.getElementById('fChat');
+  const texto = document.getElementById('texto');
+  const socket = io();
 
-  // 2) Conectar Socket.io
-  const socket = io(); // mismo host/puerto
-
-  const ul = document.getElementById('msgs');
-  const input = document.getElementById('m');
-  const sendBtn = document.getElementById('send');
-
-  function addMsg(m) {
-    const li = document.createElement('li');
-    li.textContent = `[${m.hora}] ${m.usuario}: ${m.texto}`;
-    ul.appendChild(li);
-    ul.scrollTop = ul.scrollHeight;
+  function escapeHtml(s='') {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function addMsg({ usuario, texto, ts, hora }) {
+    const time = hora || (ts ? new Date(ts).toLocaleTimeString() : '');
+    const el = document.createElement('div');
+    el.style.marginBottom = '8px';
+    el.innerHTML = `<strong>${escapeHtml(usuario)}</strong> <small>${time}</small><br>${escapeHtml(texto)}`;
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
   }
 
-  // 3) Enviar mensaje
-  function enviar() {
-    const texto = (input.value || '').trim();
-    if (!texto) return;
-    socket.emit('chat:msg', { usuario, texto });
-    input.value = '';
-    input.focus();
-  }
+  // historial (si montaste /api/chat/historial)
+  fetch('/api/chat/historial').then(r => r.json()).then(arr => arr.forEach(addMsg)).catch(()=>{});
 
-  sendBtn.addEventListener('click', enviar);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') enviar();
+  // recibir mensajes
+  socket.on('chat:msg', addMsg);
+
+  // enviar
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const txt = (texto.value || '').trim();
+    if (!txt) return;
+    socket.emit('chat:msg', { texto: txt }); // el server le pone el usuario desde sesión
+    texto.value = '';
   });
-
-  // 4) Recibir mensajes
-  socket.on('chat:msg', (m) => addMsg(m));
 })();

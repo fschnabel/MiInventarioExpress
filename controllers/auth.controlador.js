@@ -1,49 +1,60 @@
 const Usuario = require('../models/Usuario');
-const bcrypt = require('bcrypt');
 
-exports.login = async (req, res) => {
-  console.log("LOGIN solicitado");
+function sendError(res, status, message, extra = {}) {
+  return res.status(status).json({ ok: false, error: message, ...extra });
+}
 
-  const { usuario, clave } = req.body;
-bcrypt.hash('admin123', 10).then(h => console.log(h));
-  console.log("Datos recibidos:", { usuario, clave });
+exports.registrar = async (req, res) => {
+  try {
+    const { usuario, clave } = req.body;
+    if (!usuario || !clave) return sendError(res, 400, 'usuario y clave son requeridos');
 
-  if (!usuario || !clave) {
-    console.log("Faltan datos");
-    return res.status(400).json({ error: 'Datos incompletos' });
+    const existe = await Usuario.findOne({ usuario });
+    if (existe) return sendError(res, 409, 'El usuario ya existe');
+
+    const nuevo = new Usuario({ usuario, clave });
+    await nuevo.save(); // pre('save') cifra la clave
+    return res.status(201).json({ ok: true, usuario: nuevo.usuario });
+  } catch (err) {
+    console.error('REGISTRAR error:', err);
+    return sendError(res, 500, 'Error al registrar usuario');
   }
-
-  const u = await Usuario.findOne({ usuario });
-
-  console.log("Resultado en Mongo:", u);
-
-  if (!u) {
-    console.log("Usuario no existe en BD");
-    return res.status(401).json({ error: 'Credenciales inválidas' });
-  }
-
-  
-  const coincide = await bcrypt.compare(clave, u.clave); 
-
-  console.log("¿Clave correcta?:", coincide);
-
-  if (!coincide) {
-    console.log("Contraseña incorrecta");
-    return res.status(401).json({ error: 'Credenciales inválidas' });
-  }
-
-  req.session.userId = u._id;
-  req.session.usuario = u.usuario;
-
-  console.log("Login exitoso");
-  res.json({ ok: true, usuario: u.usuario });
 };
 
+exports.login = async (req, res) => {
+  try {
+    const { usuario, clave } = req.body;
+    if (!usuario || !clave) return sendError(res, 400, 'usuario y clave son requeridos');
+
+    const u = await Usuario.findOne({ usuario });
+    if (!u) return sendError(res, 401, 'Credenciales inválidas');
+
+    const ok = await u.comparar(clave);
+    if (!ok) return sendError(res, 401, 'Credenciales inválidas');
+
+    req.session.userId = u._id;
+    req.session.usuario = u.usuario;
+    return res.json({ ok: true, usuario: u.usuario });
+  } catch (err) {
+    console.error('LOGIN error:', err);
+    return sendError(res, 500, 'Error en login');
+  }
+};
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => res.json({ ok: true }));
+  try {
+    req.session.destroy(() => res.json({ ok: true }));
+  } catch (err) {
+    console.error('LOGOUT error:', err);
+    return sendError(res, 500, 'Error en logout');
+  }
 };
 
 exports.me = (req, res) => {
-  res.json({ usuario: req.session?.usuario || null });
+  try {
+    return res.json({ ok: true, usuario: req.session?.usuario || null });
+  } catch (err) {
+    console.error('ME error:', err);
+    return sendError(res, 500, 'Error al consultar sesión');
+  }
 };

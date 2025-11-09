@@ -1,0 +1,10 @@
+<h1>Bienvenido al Inventario MVC</h1>
+
+{{#if usuario}}
+  <p>Hola, <strong>{{usuario}}</strong> 👋</p>
+  <p><a href="/v/productos">➡ Ir a productos</a></p>
+  <p><a href="/v/chat">💬 Ir al chat</a></p>
+{{else}}
+  <p>Por favor inicia sesión</p>
+  <p><a href="/v/login">🔐 Iniciar sesión</a></p>
+{{/if}}

@@ -1,0 +1,15 @@
+{{#if error}}
+  <p class="err">{{error}}</p>
+{{/if}}
+
+{{#if success}}
+  <p class="ok">{{success}}</p>
+{{/if}}
+
+{{#if errores}}
+  <ul class="err">
+    {{#each errores}}
+      <li>{{this.mensaje}}</li>
+    {{/each}}
+  </ul>
+{{/if}}

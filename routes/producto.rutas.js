@@ -4,6 +4,7 @@ const multer = require("multer");
 const ctl = require("../controllers/producto.controlador");
 const { asegurarSesion } = require("../middleware/auth");
 const validarCampos = require("../middleware/validarCampos");
+const { singleFlexible } = require('../utils/upload');
 
 console.log('[RPD.ROUTES] ctl keys:', Object.keys(ctl));
 console.log('[PRD.ROUTES] typeof validarCampos:', typeof validarCampos);
@@ -23,6 +24,7 @@ router.get("/", asegurarSesion, ctl.listar);
 router.post(
   "/",
   asegurarSesion,
+  singleFlexible('imagen'),
   upload.single("imagen"),
   [
     body("nombre").notEmpty().withMessage("El nombre es obligatorio"),

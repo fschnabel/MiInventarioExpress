@@ -5,6 +5,8 @@ const multer = require('multer');
 const { asegurarSesion } = require('../middleware/auth');
 const Producto = require('../models/Producto');
 const Usuario = require('../models/Usuario');
+const { singleFlexible } = require('../utils/upload');
+
 
 // Multer (misma config que API)
 const storage = multer.diskStorage({
@@ -131,7 +133,7 @@ router.get('/v/productos/nuevo', asegurarSesion, (_req, res) => {
 // Crear (con validación y re-render en error)
 router.post('/v/productos/nuevo',
   asegurarSesion,
-  upload.single('imagen'),
+  singleFlexible('imagen'),
   [
     body('nombre').notEmpty().withMessage('El nombre es obligatorio'),
     body('precio').notEmpty().withMessage('El precio es obligatorio')
@@ -186,7 +188,18 @@ router.get('/v/productos/:id/editar', asegurarSesion, async (req, res) => {
 // Editar (POST -> re-render si error)
 router.post('/v/productos/:id/editar',
   asegurarSesion,
-  upload.single('imagen'),
+  async (req, _res, next) => {
+    const doc = await Producto.findById(req.params.id).lean();
+    req._itemVista = doc ? {
+      id: doc._id.toString(),
+      nombre: doc.nombre ?? '',
+      precio: Number(doc.precio ?? 0),
+      descripcion: doc.descripcion ?? '',
+      imagen: doc.imagen ?? ''
+    } : { id: req.params.id };
+    next();
+  },
+  singleFlexible('imagen'), 
   [
     body('nombre').notEmpty().withMessage('El nombre es obligatorio'),
     body('precio').notEmpty().withMessage('El precio es obligatorio')

@@ -74,6 +74,7 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'Inicio' });
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 app.use((err, req, res, next) => {
@@ -115,3 +116,4 @@ io.on('connection', (socket) => {
   const port = process.env.PORT || 3000;
   httpServer.listen(port, () => console.log(`🚀 http://localhost:${port}`));
 })();
+
